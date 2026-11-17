@@ -43,6 +43,12 @@ public:
   EInkDisplay() = default;
   EInkDisplay(int, int, int, int, int, int) {}
   void begin() {}
+
+
+  void setReaderRefresh(bool reading) {(void) reading;} 
+  void controllerIdle() {}; // no reason for a simulator to be idle 
+  bool displayRetainedGrayscaleOverlay(uint16_t x, uint16_t y, uint16_t w, uint16_t h, bool restore = false) {return false;};
+
   void clearScreen(uint8_t color) {}
   void drawImage(const uint8_t *imageData, uint16_t x, uint16_t y, uint16_t w,
                  uint16_t h, bool fromProgmem = false) {}

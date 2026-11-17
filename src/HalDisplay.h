@@ -6,7 +6,13 @@
 class HalDisplay {
 public:
   using Controller = BoardConfig::DisplayController;
-
+  
+  void setReaderRefresh(bool reading) { einkDisplay.setReaderRefresh(reading); }
+  void controllerIdle();
+  bool displayRetainedGrayscaleOverlay(uint16_t x, uint16_t y, uint16_t w, uint16_t h, bool restore) {
+    return einkDisplay.displayRetainedGrayscaleOverlay(x, y, w, h, restore);
+  }
+  
   enum class GrayscaleMode : uint8_t { Overlay, Absolute, Direct };
   enum class GrayscaleEncoding : uint8_t {
     Unsupported,

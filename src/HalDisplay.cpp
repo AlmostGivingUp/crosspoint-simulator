@@ -670,5 +670,6 @@ uint16_t HalDisplay::getDisplayWidthBytes() const {
   return DISPLAY_WIDTH_BYTES;
 }
 uint32_t HalDisplay::getBufferSize() const { return BUFFER_SIZE; }
+void HalDisplay::controllerIdle() { einkDisplay.controllerIdle(); }
 
 HalDisplay display;
