@@ -185,253 +185,256 @@
 #endif
 
 #define FREEINK_MCU_C3 (FREEINK_DEVICE_X3 || FREEINK_DEVICE_X4)
-#define FREEINK_CAP_WARMLIGHT                                                  \
-  (FREEINK_DEVICE_X4PRO || FREEINK_DEVICE_METALIO_EINK4_PLUS ||                \
+#define FREEINK_CAP_WARMLIGHT                                   \
+  (FREEINK_DEVICE_X4PRO || FREEINK_DEVICE_METALIO_EINK4_PLUS || \
    FREEINK_DEVICE_EEGO_A4 || FREEINK_DEVICE_PICCO)
 
 namespace BoardConfig {
 
-enum class Board {
-  XteinkX4,
-  XteinkX3,
-  XteinkX3Uc8279,
-  XteinkX4Pro,
-  XteinkX4Classic,
-  Sticky,
-  PaperMono,
-  MetalioEInk4,
-  MetalioEInk4Plus,
-  EegoA4,
-  Picco,
-};
+  enum class Board {
+    XteinkX4,
+    XteinkX3,
+    XteinkX3Uc8279,
+    XteinkX4Pro,
+    XteinkX4Classic,
+    Sticky,
+    PaperMono,
+    MetalioEInk4,
+    MetalioEInk4Plus,
+    EegoA4,
+    Picco,
+  };
 
-enum class DisplayController {
-  SSD1677 = 0,
-  UC8253 = 2,
-  ED2208 = 3,
-  LgfxEpd = 4,
-  IT8951 = 5,
-  UC8279 = 6,
-  UC8179 = 7,
-  UC8279C = 8,
-  Epdiy = 9,
-};
+  enum class DisplayController {
+    SSD1677 = 0,
+    UC8253 = 2,
+    ED2208 = 3,
+    LgfxEpd = 4,
+    IT8951 = 5,
+    UC8279 = 6,
+    UC8179 = 7,
+    UC8279C = 8,
+    Epdiy = 9,
+  };
 
-enum class TouchController : uint8_t {
-  None,
-  Chsc6x,
-  Gt911,
-  Ft5x06,
-  Ft6336u,
-  Gslx680,
-  Cst816s,
-  Tma525c
-};
+  enum class TouchController : uint8_t {
+    None,
+    Chsc6x,
+    Gt911,
+    Ft5x06,
+    Ft6336u,
+    Gslx680,
+    Cst816s,
+    Tma525c
+  };
 
-struct TouchConfig {
-  TouchController controller = TouchController::None;
-};
-
+  struct TouchConfig {
+    TouchController controller = TouchController::None;
+  };
 struct ViewableInsets {
-  uint8_t top = 9;
-  uint8_t right = 3;
-  uint8_t bottom = 3;
-  uint8_t left = 3;
-};
+    uint8_t top = 9;
+    uint8_t right = 3;
+    uint8_t bottom = 3;
+    uint8_t left = 3;
+  };
 
-struct BoardProfile {
-  Board board;
-  const char *name;
-  DisplayController displayController;
-  uint8_t displayControllerVariant;
-  struct {
-    int8_t up;
-    int8_t down;
-    int8_t toggleSwitch = -1;
-  } input;
-  ViewableInsets viewableInsets = {};
-  uint16_t displayWidth = 800;
-  uint16_t displayHeight = 480;
-  TouchConfig touch = {};
-  int8_t headerOffsetY = 0;
-  uint8_t cornerRadius = 0;
-  uint8_t bottomCornerRadius = 0;
-  int8_t statusBarOffsetY = 0;
-  int8_t tabBarOffsetY = 0;
-  uint8_t tabBarHeightPct = 100;
-  uint8_t tabBarWidthPct = 100;
-  uint8_t wifiMaxTxPower = 0;
-  float uiScale = 1.0f;
-};
+  // How the board reports button presses.
+  enum class InputStyle : uint8_t
+  {
+    XteinkAdcLadder,         // resistor ladder on two ADC pins (X3/X4)
+    DigitalButtons,          // plain active-low GPIO buttons
+    DigitalConfirmBackHold,  // confirm held > N ms synthesizes BACK (M5 PaperColor)
+    DigitalConfirmPowerHold, // confirm click, power hold on a shared GPIO
+    DigitalFiveKey,          // 3 physical GPIO keys + synthesized events (Murphy M3)
+    DigitalTwoButton,        // short up/down; holds synthesize back/confirm/power
+    OnePageAdcLadder,        // OnePage: 4 front keys on GPIO4 ADC ladder + 3 side GPIO keys
+  };
+
+  struct BoardProfile {
+    Board board;
+    const char *name;
+    InputStyle inputStyle;
+    DisplayController displayController;
+    uint8_t displayControllerVariant;
+    struct {
+      int8_t up;
+      int8_t down;
+      int8_t toggleSwitch = -1;
+    } input;
+    ViewableInsets viewableInsets = {};
+    uint16_t displayWidth = 800;
+    uint16_t displayHeight = 480;
+    TouchConfig touch = {};
+    int8_t headerOffsetY = 0;
+    uint8_t cornerRadius = 0;
+    uint8_t bottomCornerRadius = 0;
+    int8_t statusBarOffsetY = 0;
+    int8_t tabBarOffsetY = 0;
+    uint8_t tabBarHeightPct = 100;
+    uint8_t tabBarWidthPct = 100;
+    uint8_t wifiMaxTxPower = 0;
+    float uiScale = 1.0f;
+  };
 
 #if defined(SIMULATOR_DISPLAY_UC8179)
-inline constexpr DisplayController X4_DISPLAY_CONTROLLER =
-    DisplayController::UC8179;
-inline constexpr uint8_t X4_DISPLAY_CONTROLLER_VARIANT = 0x01;
+  inline constexpr DisplayController X4_DISPLAY_CONTROLLER =
+      DisplayController::UC8179;
+  inline constexpr uint8_t X4_DISPLAY_CONTROLLER_VARIANT = 0x01;
 #elif defined(SIMULATOR_DISPLAY_UC8279)
-inline constexpr DisplayController X4_DISPLAY_CONTROLLER =
-    DisplayController::UC8279;
-// The SDK supports LUT_VER 0x02, 0x68, and reserved 0x69. Model the documented
-// 0x68 production variant by default; callers can still inspect the controller.
-inline constexpr uint8_t X4_DISPLAY_CONTROLLER_VARIANT = 0x68;
+  inline constexpr DisplayController X4_DISPLAY_CONTROLLER =
+      DisplayController::UC8279;
+  // The SDK supports LUT_VER 0x02, 0x68, and reserved 0x69. Model the documented
+  // 0x68 production variant by default; callers can still inspect the controller.
+  inline constexpr uint8_t X4_DISPLAY_CONTROLLER_VARIANT = 0x68;
 #else
-inline constexpr DisplayController X4_DISPLAY_CONTROLLER =
-    DisplayController::SSD1677;
-inline constexpr uint8_t X4_DISPLAY_CONTROLLER_VARIANT = 0;
+  inline constexpr DisplayController X4_DISPLAY_CONTROLLER =
+      DisplayController::SSD1677;
+  inline constexpr uint8_t X4_DISPLAY_CONTROLLER_VARIANT = 0;
 #endif
 
-inline constexpr BoardProfile XTEINK_X4 = {Board::XteinkX4, "xteink_x4",
-                                           X4_DISPLAY_CONTROLLER,
-                                           X4_DISPLAY_CONTROLLER_VARIANT,
-                                           {4, 5}};
-inline constexpr BoardProfile XTEINK_X3 = {Board::XteinkX3, "xteink_x3",
-                                           DisplayController::UC8253, 0, {4, 5}};
-inline constexpr BoardProfile XTEINK_X3_UC8279 = {
-    Board::XteinkX3Uc8279, "xteink_x3_uc8279", DisplayController::UC8279, 0,
-    {4, 5}};
-inline constexpr BoardProfile XTEINK_X4_PRO = {
-    Board::XteinkX4Pro, "xteink_x4_pro", X4_DISPLAY_CONTROLLER,
-    X4_DISPLAY_CONTROLLER_VARIANT, {0, 7}, {}, 800, 480,
-    {TouchController::Gt911}};
-inline constexpr BoardProfile XTEINK_X4_CLASSIC = {
-    Board::XteinkX4Classic, "xteink_x4_classic", X4_DISPLAY_CONTROLLER,
-    X4_DISPLAY_CONTROLLER_VARIANT, {0, 7}, {9, 7, 3, 7}};
-inline constexpr BoardProfile STICKY = {
-    Board::Sticky, "sticky", DisplayController::SSD1677, 0, {5, 6}, {}, 800,
-    480, {TouchController::Gt911}};
-inline constexpr BoardProfile PAPER_MONO = {
-    Board::PaperMono, "m5stack_paper_mono", DisplayController::SSD1677, 0,
-    {0, 7}, {9, 7, 3, 7}, 800, 480, {TouchController::Ft6336u}};
+  inline constexpr BoardProfile XTEINK_X4 = {Board::XteinkX4, "xteink_x4", InputStyle::XteinkAdcLadder, X4_DISPLAY_CONTROLLER, X4_DISPLAY_CONTROLLER_VARIANT, {4, 5}};
+  inline constexpr BoardProfile XTEINK_X3 = {Board::XteinkX3, "xteink_x3", InputStyle::XteinkAdcLadder, DisplayController::UC8253, 0, {4, 5}};
+  inline constexpr BoardProfile XTEINK_X3_UC8279 = {
+      Board::XteinkX3Uc8279, "xteink_x3_uc8279", InputStyle::XteinkAdcLadder, DisplayController::UC8279, 0, {4, 5}};
+  inline constexpr BoardProfile XTEINK_X4_PRO = {
+      Board::XteinkX4Pro, "xteink_x4_pro", InputStyle::DigitalButtons, X4_DISPLAY_CONTROLLER, X4_DISPLAY_CONTROLLER_VARIANT, {0, 7}, {}, 800, 480, {TouchController::Gt911}};
+  inline constexpr BoardProfile XTEINK_X4_CLASSIC = {
+      Board::XteinkX4Classic, "xteink_x4_classic", InputStyle::DigitalButtons, X4_DISPLAY_CONTROLLER, X4_DISPLAY_CONTROLLER_VARIANT, {0, 7}, {9, 7, 3, 7}};
+  inline constexpr BoardProfile STICKY = {
+      Board::Sticky, "sticky", InputStyle::DigitalConfirmPowerHold, DisplayController::SSD1677, 0, {5, 6}, {}, 800, 480, {TouchController::Gt911}};
+  inline constexpr BoardProfile PAPER_MONO = {
+      Board::PaperMono, "m5stack_paper_mono",  InputStyle::DigitalTwoButton, DisplayController::SSD1677, 0, {0, 7}, {9, 7, 3, 7}, 800, 480, {TouchController::Ft6336u}};
 
-inline constexpr BoardProfile METALIO_EINK4 = {Board::MetalioEInk4,
-                                               "metalio_eink4",
-                                               DisplayController::SSD1677,
-                                               0,
-                                               {-1, -1},
-                                               {},
-                                               800,
-                                               480,
-                                               {TouchController::Cst816s}};
-inline constexpr BoardProfile METALIO_EINK4_PLUS = {
-    .board = Board::MetalioEInk4Plus,
-    .name = "metalio_eink4_plus",
-    .displayController = DisplayController::Epdiy,
-    .displayControllerVariant = 0,
-    .input = {-1, -1},
-    .viewableInsets = {2, 2, 12, 2},
-    .displayWidth = 1216,
-    .displayHeight = 684,
-    .touch = {TouchController::Ft6336u},
-    .wifiMaxTxPower = 60,
-    .uiScale = 1.5f};
+  inline constexpr BoardProfile METALIO_EINK4 = {Board::MetalioEInk4,
+                                                 "metalio_eink4",
+                                                  InputStyle::DigitalButtons,
+                                                 DisplayController::SSD1677,
+                                                 0,
+                                                 {-1, -1},
+                                                 {},
+                                                 800,
+                                                 480,
+                                                 {TouchController::Cst816s}};
+  inline constexpr BoardProfile METALIO_EINK4_PLUS = {
+      .board = Board::MetalioEInk4Plus,
+      .name = "metalio_eink4_plus",
+      .displayController = DisplayController::Epdiy,
+      .displayControllerVariant = 0,
+      .input = {-1, -1},
+      .viewableInsets = {2, 2, 12, 2},
+      .displayWidth = 1216,
+      .displayHeight = 684,
+      .touch = {TouchController::Ft6336u},
+      .wifiMaxTxPower = 60,
+      .uiScale = 1.5f};
 
-inline constexpr BoardProfile EEGO_A4 = {Board::EegoA4,
-                                         "eego_a4",
-                                         DisplayController::UC8279C,
-                                         0,
-                                         {5, 7},
-                                         {24, 24, 8, 24},
-                                         768,
-                                         552,
-                                         {TouchController::Gslx680},
-                                         6,
-                                         24,
-                                         18,
-                                         80,
-                                         80,
-                                         60};
+  inline constexpr BoardProfile EEGO_A4 = {Board::EegoA4,
+                                           "eego_a4",
+                                            InputStyle::DigitalButtons,
+                                           DisplayController::UC8279C,
+                                           0,
+                                           {5, 7},
+                                           {24, 24, 8, 24},
+                                           768,
+                                           552,
+                                           {TouchController::Gslx680},
+                                           6,
+                                           24,
+                                           18,
+                                           80,
+                                           80,
+                                           60};
 
-inline constexpr BoardProfile PICCO = {
-    Board::Picco, "picco", DisplayController::SSD1677, 0, {21, 9, 6}, {},
-    800,          480,     {TouchController::Tma525c}};
+  inline constexpr BoardProfile PICCO = {
+      Board::Picco, "picco",  InputStyle::DigitalButtons, DisplayController::SSD1677, 0, {21, 9, 6}, {}, 800, 480, {TouchController::Tma525c}};
 
 #if defined(SIMULATOR_DEVICE_PICCO)
-inline constexpr BoardProfile DEFAULT_DEVICE = PICCO;
+  inline constexpr BoardProfile DEFAULT_DEVICE = PICCO;
 #elif defined(SIMULATOR_DEVICE_EEGO_A4)
-inline constexpr BoardProfile DEFAULT_DEVICE = EEGO_A4;
+  inline constexpr BoardProfile DEFAULT_DEVICE = EEGO_A4;
 #elif defined(SIMULATOR_DEVICE_METALIO_EINK4)
-inline constexpr BoardProfile DEFAULT_DEVICE = METALIO_EINK4;
+  inline constexpr BoardProfile DEFAULT_DEVICE = METALIO_EINK4;
 #elif defined(SIMULATOR_DEVICE_METALIO_EINK4_PLUS)
-inline constexpr BoardProfile DEFAULT_DEVICE = METALIO_EINK4_PLUS;
+  inline constexpr BoardProfile DEFAULT_DEVICE = METALIO_EINK4_PLUS;
 #elif defined(SIMULATOR_DEVICE_PAPERMONO)
-inline constexpr BoardProfile DEFAULT_DEVICE = PAPER_MONO;
+  inline constexpr BoardProfile DEFAULT_DEVICE = PAPER_MONO;
 #elif defined(SIMULATOR_DEVICE_STICKY)
-inline constexpr BoardProfile DEFAULT_DEVICE = STICKY;
+  inline constexpr BoardProfile DEFAULT_DEVICE = STICKY;
 #elif defined(SIMULATOR_DEVICE_X4_PRO)
-inline constexpr BoardProfile DEFAULT_DEVICE = XTEINK_X4_PRO;
+  inline constexpr BoardProfile DEFAULT_DEVICE = XTEINK_X4_PRO;
 #elif defined(SIMULATOR_DEVICE_X4_CLASSIC)
-inline constexpr BoardProfile DEFAULT_DEVICE = XTEINK_X4_CLASSIC;
+  inline constexpr BoardProfile DEFAULT_DEVICE = XTEINK_X4_CLASSIC;
 #elif defined(SIMULATOR_DEVICE_X3)
 #if defined(SIMULATOR_DISPLAY_UC8279)
-inline constexpr BoardProfile DEFAULT_DEVICE = XTEINK_X3_UC8279;
+  inline constexpr BoardProfile DEFAULT_DEVICE = XTEINK_X3_UC8279;
 #else
-inline constexpr BoardProfile DEFAULT_DEVICE = XTEINK_X3;
+  inline constexpr BoardProfile DEFAULT_DEVICE = XTEINK_X3;
 #endif
 #else
-inline constexpr BoardProfile DEFAULT_DEVICE = XTEINK_X4;
+  inline constexpr BoardProfile DEFAULT_DEVICE = XTEINK_X4;
 #endif
 
-inline BoardProfile ACTIVE = DEFAULT_DEVICE;
+  inline BoardProfile ACTIVE = DEFAULT_DEVICE;
 
-inline bool selectDevice(Board board) {
-  switch (board) {
-  case Board::XteinkX4:
-    ACTIVE = XTEINK_X4;
-    return true;
-  case Board::XteinkX3:
-    ACTIVE = XTEINK_X3;
-    return true;
-  case Board::XteinkX3Uc8279:
-    ACTIVE = XTEINK_X3_UC8279;
-    return true;
-  case Board::XteinkX4Pro:
-    ACTIVE = XTEINK_X4_PRO;
-    return true;
-  case Board::XteinkX4Classic:
-    ACTIVE = XTEINK_X4_CLASSIC;
-    return true;
-  case Board::Sticky:
-    ACTIVE = STICKY;
-    return true;
-  case Board::MetalioEInk4:
-    ACTIVE = METALIO_EINK4;
-    return true;
-  case Board::MetalioEInk4Plus:
-    ACTIVE = METALIO_EINK4_PLUS;
-    return true;
-  case Board::PaperMono:
-    ACTIVE = PAPER_MONO;
-    return true;
-  case Board::EegoA4:
-    ACTIVE = EEGO_A4;
-    return true;
-  case Board::Picco:
-    ACTIVE = PICCO;
-    return true;
+  inline bool selectDevice(Board board) {
+    switch (board) {
+    case Board::XteinkX4:
+      ACTIVE = XTEINK_X4;
+      return true;
+    case Board::XteinkX3:
+      ACTIVE = XTEINK_X3;
+      return true;
+    case Board::XteinkX3Uc8279:
+      ACTIVE = XTEINK_X3_UC8279;
+      return true;
+    case Board::XteinkX4Pro:
+      ACTIVE = XTEINK_X4_PRO;
+      return true;
+    case Board::XteinkX4Classic:
+      ACTIVE = XTEINK_X4_CLASSIC;
+      return true;
+    case Board::Sticky:
+      ACTIVE = STICKY;
+      return true;
+    case Board::MetalioEInk4:
+      ACTIVE = METALIO_EINK4;
+      return true;
+    case Board::MetalioEInk4Plus:
+      ACTIVE = METALIO_EINK4_PLUS;
+      return true;
+    case Board::PaperMono:
+      ACTIVE = PAPER_MONO;
+      return true;
+    case Board::EegoA4:
+      ACTIVE = EEGO_A4;
+      return true;
+    case Board::Picco:
+      ACTIVE = PICCO;
+      return true;
+    }
+    return false;
   }
-  return false;
-}
 
-inline bool isX4Pro() { return ACTIVE.board == Board::XteinkX4Pro; }
-inline bool isX4Classic() { return ACTIVE.board == Board::XteinkX4Classic; }
-inline bool isSticky() { return ACTIVE.board == Board::Sticky; }
-inline bool isPaperMono() { return ACTIVE.board == Board::PaperMono; }
-inline bool isMetalioEInk4() { return ACTIVE.board == Board::MetalioEInk4; }
-inline bool isMetalioEInk4Plus() { return ACTIVE.board == Board::MetalioEInk4Plus; }
-inline bool isEegoA4() { return ACTIVE.board == Board::EegoA4; }
-inline bool isPicco() { return ACTIVE.board == Board::Picco; }
-inline bool hasTouch() {
-  return isX4Pro() || isSticky() || isPaperMono() || isMetalioEInk4() || isMetalioEInk4Plus() ||
-         isEegoA4() || isPicco();
-}
-inline bool hasHomeKey() { return isX4Pro() || isMetalioEInk4() || isEegoA4() || isMetalioEInk4Plus(); }
-inline bool hasPwmFrontlight() { return isX4Pro() || isPaperMono() || isMetalioEInk4Plus(); }
-inline bool hasI2cFrontlight() { return isEegoA4() || isPicco(); }
+  inline bool isX4Pro() { return ACTIVE.board == Board::XteinkX4Pro; }
+  inline bool isX4Classic() { return ACTIVE.board == Board::XteinkX4Classic; }
+  inline bool isSticky() { return ACTIVE.board == Board::Sticky; }
+  inline bool isPaperMono() { return ACTIVE.board == Board::PaperMono; }
+  inline bool isMetalioEInk4() { return ACTIVE.board == Board::MetalioEInk4; }
+  inline bool isMetalioEInk4Plus() { return ACTIVE.board == Board::MetalioEInk4Plus; }
+  inline bool isEegoA4() { return ACTIVE.board == Board::EegoA4; }
+  inline bool isPicco() { return ACTIVE.board == Board::Picco; }
+  inline bool hasTouch() {
+    return isX4Pro() || isSticky() || isPaperMono() || isMetalioEInk4() || isMetalioEInk4Plus() ||
+           isEegoA4() || isPicco();
+  }
+  inline bool hasHomeKey() { return isX4Pro() || isMetalioEInk4() || isEegoA4() || isMetalioEInk4Plus(); }
+  inline bool hasPwmFrontlight() { return isX4Pro() || isPaperMono() || isMetalioEInk4Plus(); }
+  inline bool hasI2cFrontlight() { return isEegoA4() || isPicco(); }
 
-inline void holdPowerRails() {}
+  inline void holdPowerRails() {}
 
 } // namespace BoardConfig
 
 namespace freeink::metalioplus {
-inline bool powerKeyHeld() { return true; }
+  inline bool powerKeyHeld() { return true; }
 } // namespace freeink::metalioplus
