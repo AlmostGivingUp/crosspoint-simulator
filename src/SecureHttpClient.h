@@ -102,6 +102,21 @@ class SecureHttpClient {
   bool hasContentLength() const { return http_.hasContentLength(); }
   size_t getContentLength() const { return http_.getContentLength(); }
   std::string getHeader(const std::string& name) const { return http_.getHeader(name); }
+  
+  std::string getCombinedHeader(const char* lowercaseName) const {
+      if (!lowercaseName) return {};
+      const auto headers = getHeaders();
+      std::string value;
+      bool first = true;
+      for (const auto& [name, headerValue] : headers) {
+          if (name != lowercaseName) continue;
+          if (!first) value += ", ";
+          value += headerValue;
+          first = false;
+      }
+      return value;
+  }
+  
   bool responseComplete() const { return http_.responseComplete() && !callbackStopped_ && !aborted_; }
   bool aborted() const { return aborted_; }
   std::vector<std::pair<std::string, std::string>> getHeaders() const {
